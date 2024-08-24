@@ -10,6 +10,8 @@ export compound, gene
 
 ## Provide a 2-way indexing between string and int
 
+
+## remove to replace by symbols
 struct StrIndex
     str2id::Dict{String, Int32}
     id2str::Vector{String}
