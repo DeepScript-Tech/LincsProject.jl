@@ -55,6 +55,8 @@ end
 
 
 function Data(fn::String)
+    println("Loading from cache...")
+
     f = h5open(fn)
     gene_df = DataFrame(f["gene_df"])
     gene_si = StrIndex(f["gene_si"])
@@ -87,6 +89,9 @@ gene(d::Data) = d.gene_df
 gene(d::Data, sym::String) = d.gene_df[d.gene_si[sym], :]
 
 function Data(prefix::String, gctx::String, out_fn::String)
+    isfile(out_fn) && return Data(out_fn)
+    println("Parsing from LINCS files...")
+
     f_out = h5open(out_fn, "w")
 
     println("Loading from original files...")
