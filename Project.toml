@@ -1,14 +1,15 @@
+name = "LincsProject"
+uuid = "f951e42b-01cc-4281-9607-5c79d22473fa"
 authors = ["Sébastien Lemieux <s.lemieux@umontreal.ca>"]
-name = "Lincs"
-uuid = "cd36d6ef-9674-4fa0-8244-e1c5097a9680"
 version = "0.1.0"
-
-[compat]
-julia = ">= 1.10"
 
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 HDF5 = "f67ccb44-e63f-5c2f-98bd-6dc0ccc4ba2f"
+JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
 LocalRegistry = "89398ba2-070a-4b16-a995-9893c55d93cf"
 ProgressBars = "49802e3a-d2f1-5c88-81d8-b72133a6f568"
+
+[compat]
+julia = ">= 1.10"
