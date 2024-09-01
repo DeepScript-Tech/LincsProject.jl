@@ -1,4 +1,4 @@
-module Lincs
+module LincsProject
 
 # working on new branch?
 

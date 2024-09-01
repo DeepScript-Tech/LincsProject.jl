@@ -1,6 +1,6 @@
 # using Pkg
 # Pkg.activate(".")
 
-using Lincs
+using LincsProject
 
-z = Lincs("../data/")
+z = Lincs("data/lincs_all_genes.h5")
