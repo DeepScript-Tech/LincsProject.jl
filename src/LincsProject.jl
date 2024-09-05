@@ -1,5 +1,14 @@
 module LincsProject
 
+    export Lincs
+
+    include("structs.jl")
+    using .Structs
+
+end
+
+
+
 # working on new branch?
 
 # using HDF5, CSV, DataFrames
@@ -25,7 +34,7 @@ module LincsProject
 # Base.getindex(idx::StrIndex, i::Integer) = idx.id2str[i]
 # Base.getindex(idx::StrIndex, v::AbstractVector{String}) = [idx[s] for s in v]
 # Base.getindex(idx::StrIndex, v::AbstractVector{<:Integer}) = [idx[i] for i in v]
-# Base.getindex(idx::StrIndex, df::AbstractDataFrame) = mapcols(col -> idx[col], df)
+# Base.getindex(idx::StrIndex, df::AbstractDataFrame) = mapcols(col -> idx[col], df)    
 # Base.length(idx::StrIndex) = length(idx.id2str)
 
 ## HDF5 IO
@@ -45,12 +54,6 @@ module LincsProject
 # end
 
 ## LINCS data structure
-
-include("structs.jl")
-
-export Lincs
-
-
 
 # function Lincs(fn::String)
 #     println("Loading from cache...")
@@ -85,6 +88,3 @@ export Lincs
 
 # gene(d::Lincs) = d.gene_df
 # gene(d::Lincs, sym::String) = d.gene_df[d.gene_si[sym], :]
-
-
-end
