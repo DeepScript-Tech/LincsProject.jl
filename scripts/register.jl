@@ -1,0 +1,3 @@
+using LocalRegistry
+
+register()
