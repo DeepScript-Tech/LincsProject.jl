@@ -9,10 +9,9 @@ function _Lincs(fn::String)
 end
 
 function Lincs(prefix::String, gctx::String, out_fn::String)
-    isfile(out_fn) && return _Lincs(out_fn)
-    println("Parsing from LINCS files...")
+    isfile(out_fn) && return _Lincs(out_fn) # Checks the cache
 
-    f_out = h5open(out_fn, "w")
+    println("Parsing from LINCS files...")
 
     println("Loading from original files...")
     f = h5open(prefix * gctx)
@@ -70,28 +69,21 @@ function Lincs(prefix::String, gctx::String, out_fn::String)
 
     final = Matrix{Float32}(undef, (nlm, ninst)) 
 
-    function load!(final, expr, lm_row, r::UnitRange{T}) where T <: Integer
-        # println(r)
-        # println(expr[:,r])
+    function _load!(final, expr, lm_row, r::UnitRange{T}) where T <: Integer
         slab = expr[:,r]
         final[:,r] = slab[lm_row,:]
     end
 
-    function test(chunk_size, ninst, final, expr, lm_row)
-        ## This actually loads the file (about 15 minutes)
-        @Threads.threads for start in ProgressBar(1:chunk_size:ninst)
-            # println("start=$start")
-            r = start:min(start+chunk_size-1, ninst)
-            load!(final, expr, lm_row, r)
-            # println("end=$start")
-        end
+    ## This actually loads the file (about 15 minutes)
+    @Threads.threads for start in ProgressBar(1:chunk_size:ninst)
+        # println("start=$start")
+        r = start:min(start+chunk_size-1, ninst)
+        _load!(final, expr, lm_row, r)
+        # println("end=$start")
     end
 
-    test(chunk_size, ninst, final, expr, lm_row)
-
     lincs = Lincs(final, gene_df, compound_df, inst_df)
-    jldsave("/home/iorek/lemieuxs/tmp/save_test.jld2"; lincs)
-
+    jldsave(out_fn; lincs)
     
-    return Lincs(final, gene_df, lm_sym, compound_df, compound_si, inst_df, inst_si)
+    return Lincs(final, gene_df, compound_df, inst_df)
 end

@@ -7,7 +7,7 @@ module LincsProject
 
 end
 
-
+#NEXT: fetch the important functionalities below
 
 # working on new branch?
 
