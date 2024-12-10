@@ -3,11 +3,12 @@ using DataFrames, ElasticArrays
 export get_neutral_profiles, get_treatment_data
 
 
-getindex(d::Lincs, sym::Symbol, value::String) = d.inst[!, sym] .== value
-getindex(df::DataFrame, sym::Symbol, value::String) = df[!, sym] .== value
+Base.getindex(d::Lincs, sym::Symbol, value::Symbol) = d.inst[!, sym] .== value
+Base.getindex(df::DataFrame, sym::Symbol, value::Symbol) = df[!, sym] .== value
+Base.getindex(d::Lincs, v::BitVector) = d.inst[v, :]
 
 
-function create_filter(lm_data::Lincs, criteria::Dict{Symbol, String})
+function create_filter(lm_data::Lincs, criteria::Dict{Symbol, Symbol})
     # Returns a bit vector: 1 for experiments that satisfy all the criteria, else 0.
     filters = []
     for (k, v) in criteria
@@ -22,10 +23,10 @@ function get_neutral_profiles(lm_data::Lincs)
     #= Returns a df of 979 columns: cell line, neutral expression profile (978 genes).
     If several neutral profiles are available for a given cell line, they are all stored in the returned df. =#
 
-    cell_line_arr = ElasticArray{String}(undef, 1, 0)
+    cell_line_arr = ElasticArray{Symbol}(undef, 1, 0)
     profile_arr = ElasticArray{Float32}(undef, size(lm_data.gene)[1], 0) 
     
-    criteria = Dict{Symbol, String}(:qc_pass => "1", :pert_type => "ctl_untrt")
+    criteria = Dict{Symbol, Symbol}(:qc_pass => Symbol("1"), :pert_type => :ctl_untrt)
     f = create_filter(lm_data, criteria)
     neutral_experiments = lm_data[f] 
     
@@ -41,12 +42,11 @@ function get_neutral_profiles(lm_data::Lincs)
     profiles = transpose(profile_arr) |> Array 
     df = DataFrame(profiles, :auto)
     # Insert cell_line as the first column
-    cell_lines = vec(collect(cell_line_arr))
+    cell_lines = String.(vec(collect(cell_line_arr)))
     insertcols!(df, 1, :cell_line => cell_lines)
     # Add header
-    gene_names = lm_data.gene.gene_symbol
-    col_names = ["cell_line"; gene_names]
-    rename!(df, Symbol.(col_names))
+    col_names = ["cell_line"; lm_data.gene.gene_symbol]
+    rename!(df, col_names)
 
     return df
 end
@@ -57,13 +57,13 @@ function get_treatment_data(lm_data::Lincs)
     If a compound is used several times for a given experimental setup (cell line, dose, exposure time), 
     all the associated profiles are in the returned df. =#
 
-    cell_line_arr = ElasticArray{String}(undef, 1, 0)
-    dose_arr = ElasticArray{String}(undef, 1, 0)
-    time_arr = ElasticArray{String}(undef, 1, 0)
-    compound_arr = ElasticArray{String}(undef, 1, 0)
+    cell_line_arr = ElasticArray{Symbol}(undef, 1, 0)
+    dose_arr = ElasticArray{Symbol}(undef, 1, 0)
+    time_arr = ElasticArray{Symbol}(undef, 1, 0)
+    compound_arr = ElasticArray{Symbol}(undef, 1, 0)
     profile_arr = ElasticArray{Float32}(undef, size(lm_data.gene)[1], 0) 
 
-    criteria = Dict{Symbol, String}(:qc_pass => "1", :pert_type => "trt_cp")
+    criteria = Dict{Symbol, Symbol}(:qc_pass => Symbol("1"), :pert_type => :trt_cp)
     f = create_filter(lm_data, criteria) 
     selected_experiments = lm_data[f] 
 
@@ -73,9 +73,9 @@ function get_treatment_data(lm_data::Lincs)
         cl_experiments = lm_data[cl_filter]
         cl_profiles = lm_data.expr[:, cl_indices] 
         append!(cell_line_arr, fill(cl, length(cl_indices))) 
-        append!(dose_arr, lm_data.inst_si[cl_experiments.pert_idose])
-        append!(time_arr, lm_data.inst_si[cl_experiments.pert_itime])
-        append!(compound_arr, lm_data.inst_si[cl_experiments.pert_id])
+        append!(dose_arr, cl_experiments.pert_idose)
+        append!(time_arr, cl_experiments.pert_itime)
+        append!(compound_arr, cl_experiments.pert_id)
         append!(profile_arr, cl_profiles)
     end
 
@@ -91,14 +91,13 @@ function get_treatment_data(lm_data::Lincs)
     profiles = transpose(profile_arr) |> Array 
     df = DataFrame(profiles, :auto)
     # Insert columns cell_line, dose, exposure_time and smiles
-    cell_lines = vec(collect(cell_line_arr))
-    doses = vec(collect(dose_arr))
-    times = vec(collect(time_arr))
+    cell_lines = String.(vec(collect(cell_line_arr)))
+    doses = String.(vec(collect(dose_arr)))
+    times = String.(vec(collect(time_arr)))
     insertcols!(df, 1, :cell_line => cell_lines, :dose => doses, :exposure_time => times, :smiles => smiles)
     # Add header
-    gene_names = lm_data.gene.gene_symbol
-    col_names = ["cell_line"; "dose"; "exposure_time"; "smiles"; gene_names]
-    rename!(df, Symbol.(col_names))
+    col_names = ["cell_line"; "dose"; "exposure_time"; "smiles"; lm_data.gene.gene_symbol]
+    rename!(df, col_names)
 
     return df
 end

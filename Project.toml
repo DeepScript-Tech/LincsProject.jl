@@ -1,7 +1,7 @@
 name = "LincsProject"
 uuid = "f951e42b-01cc-4281-9607-5c79d22473fa"
 authors = ["Sébastien Lemieux <s.lemieux@umontreal.ca>"]
-version = "0.1.4"
+version = "0.1.5"
 
 [deps]
 BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"

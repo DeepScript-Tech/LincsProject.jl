@@ -42,7 +42,7 @@ function Lincs(prefix::String, gctx::String, out_fn::String)
     inst_df = CSV.File(prefix * "instinfo_beta.txt", delim = '\t', types=String, missingstring=nothing, pool=false) |> DataFrame
 
     @Threads.threads for col in names(inst_df)
-        inst_df[!, col] = Symbol.(inst_df[!, col]) # 
+        inst_df[!, col] = Symbol.(inst_df[!, col])
     end
 
     expr_id = Symbol.(f["0/META/COL/id"][:]) # Order of samples in the matrix
@@ -55,8 +55,8 @@ function Lincs(prefix::String, gctx::String, out_fn::String)
     inst_df = inst_df[i2e,:]
 
     println("Subsetting landmark genes")
-    g = groupby(gene_df, :feature_space)
-    lm_id = get(g, (feature_space=:landmark,), nothing).gene_id
+    lm_gene_df = filter(row -> row.feature_space == :landmark, gene_df) 
+    lm_id = lm_gene_df.gene_id 
     # gene_df = gene_df[dfGene_idx[lm_id],:]
     # lm_sym = StrIndex(gene_df.gene_symbol)
     # lm_row = exprGene_idx[lm_id] ## convert to the matrix rows
@@ -82,8 +82,8 @@ function Lincs(prefix::String, gctx::String, out_fn::String)
         # println("end=$start")
     end
 
-    lincs = Lincs(final, gene_df, compound_df, inst_df)
+    lincs = Lincs(final, lm_gene_df, compound_df, inst_df)
     jldsave(out_fn; lincs)
     
-    return Lincs(final, gene_df, compound_df, inst_df)
+    return Lincs(final, lm_gene_df, compound_df, inst_df)
 end
