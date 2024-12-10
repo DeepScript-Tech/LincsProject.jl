@@ -5,6 +5,8 @@ module LincsProject
     include("structs.jl")
     using .Structs
 
+    include("utils.jl")
+
 end
 
 #NEXT: fetch the important functionalities below
