@@ -5,7 +5,7 @@ include("parallel_sort.jl")
 function _Lincs(fn::String)
     println("Loading from cache...")
     d = load(fn)
-    return d
+    return d["lincs"]
 end
 
 function Lincs(prefix::String, gctx::String, out_fn::String)
