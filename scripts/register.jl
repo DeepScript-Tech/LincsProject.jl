@@ -1,3 +1,3 @@
 using LocalRegistry
 
-register()
+register("../.")
