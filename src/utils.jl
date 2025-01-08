@@ -4,7 +4,7 @@ export get_neutral_profiles, get_treatment_data
 
 
 Base.getindex(d::Lincs, sym::Symbol, value::Symbol) = d.inst[!, sym] .== value
-Base.getindex(d::Lincs, sym::Symbol, value::Vector{Symbol}) = filter(row -> row[sym] in values, d.inst)
+Base.getindex(d::Lincs, sym::Symbol, values::Vector{Symbol}) = filter(row -> row[sym] in values, d.inst)
 Base.getindex(d::Lincs, v::BitVector) = d.inst[v, :]
 
 Base.getindex(df::DataFrame, sym::Symbol, value::Symbol) = df[!, sym] .== value
