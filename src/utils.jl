@@ -1,6 +1,6 @@
 using DataFrames, ElasticArrays
 
-export get_neutral_profiles, get_treatment_data
+export get_untrt_profiles, get_treatment_data
 
 
 Base.getindex(d::Lincs, sym::Symbol, value::Symbol) = d.inst[!, sym] .== value
@@ -27,18 +27,18 @@ function create_filter(lm_data::Lincs, criteria::Dict{Symbol, Symbol})
 end
 
 
-function get_neutral_profiles(lm_data::Lincs)
-    #= Returns a df of 979 columns: cell line, neutral expression profile (978 genes).
-    If several neutral profiles are available for a given cell line, they are all stored in the returned df. =#
+function get_untrt_profiles(lm_data::Lincs)
+    #= Returns a df of 979 columns: cell line, untreated expression profile (978 genes).
+    If several untrt profiles are available for a given cell line, they are all stored in the returned df. =#
 
     cell_line_arr = ElasticArray{Symbol}(undef, 1, 0)
     profile_arr = ElasticArray{Float32}(undef, size(lm_data.gene)[1], 0) 
     
     criteria = Dict{Symbol, Symbol}(:qc_pass => Symbol("1"), :pert_type => :ctl_untrt)
     f = create_filter(lm_data, criteria)
-    neutral_experiments = lm_data[f] 
+    untrt_experiments = lm_data[f] 
     
-    for cl in unique(neutral_experiments.cell_iname)
+    for cl in unique(untrt_experiments.cell_iname)
         cl_filter = (f .& lm_data[:cell_iname, cl]) 
         cl_indices = findall(x -> x == 1, cl_filter) 
         cl_profiles = lm_data.expr[:, cl_indices] 
