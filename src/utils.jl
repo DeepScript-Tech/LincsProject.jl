@@ -16,7 +16,7 @@ Base.getindex(df::DataFrame, sym::Symbol, values::Vector{String}) = [v in values
 Base.getindex(df::DataFrame, v::BitVector) = df[v, :]
 
 
-function create_filter(lm_data::Lincs, criteria::Dict{Symbol, Symbol})
+function create_filter(lm_data::Lincs, criteria::Dict{Symbol, Vector{Symbol}})
     # Returns a bit vector: 1 for experiments that satisfy all the criteria, else 0.
     filters = []
     for (k, v) in criteria
@@ -30,7 +30,7 @@ end
 function get_untreated_profiles(lm_data::Lincs)
     #= Returns a df of 979 columns: cell line, untreated expression profile (978 genes).
     If several untrt profiles are available for a given cell line, they are all stored in the returned df. =#
-    criteria = Dict{Symbol, Symbol}(:qc_pass => Symbol("1"), :pert_type => :ctl_untrt)
+    criteria = Dict{Symbol, Symbol}(:qc_pass => [Symbol("1")], :pert_type => [:ctl_untrt, :ctl_vehicle])
     f = create_filter(lm_data, criteria)
     untrt_experiments = lm_data[f] 
     untrt_profiles = lm_data.expr[:, f]
@@ -48,7 +48,7 @@ function get_treated_profiles(lm_data::Lincs)
     If a compound is used several times for a given experimental setup (cell line, dose, exposure time), 
     all the associated profiles are in the returned df. =#
 
-    criteria = Dict{Symbol, Symbol}(:qc_pass => Symbol("1"), :pert_type => :trt_cp)
+    criteria = Dict{Symbol, Symbol}(:qc_pass => [Symbol("1")], :pert_type => [:trt_cp])
     f = create_filter(lm_data, criteria) 
     trt_experiments = lm_data[f] 
     trt_profiles = lm_data.expr[:, f]
