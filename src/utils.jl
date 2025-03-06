@@ -68,7 +68,10 @@ function get_treated_profiles(lm_data::Lincs)
     col_names = ["cell_line"; "dose"; "exposure_time"; "smiles"; lm_data.gene.gene_symbol]
     rename!(df, col_names)
 
-    return df
+    # Remove the rows where the SMILES, the dose or the exposure time is missing:
+    filtered_df = filter(row -> row.smiles != "" && row.dose != Symbol("") && row.exposure_time != Symbol(""), eachrow(df)) |> DataFrame
+
+    return filtered_df
 end
 
 
