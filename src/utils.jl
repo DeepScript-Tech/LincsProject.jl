@@ -1,8 +1,9 @@
-using DataFrames, ElasticArrays
+using DataFrames # , ElasticArrays
 
-export get_untreated_profiles, get_treated_profiles
+export get_untreated_profiles, get_treated_profiles, split_by, expr
 
 
+Base.getindex(d::Lincs, sym::Symbol) = d.inst[!, sym]
 Base.getindex(d::Lincs, sym::Symbol, value::Symbol) = d.inst[!, sym] .== value
 Base.getindex(d::Lincs, sym::Symbol, values::Vector{Symbol}) = [v in values for v in d.inst[!, sym]]
 Base.getindex(d::Lincs, sym::Symbol, value::String) = d.inst[!, sym] .== value
@@ -15,6 +16,8 @@ Base.getindex(df::DataFrame, sym::Symbol, value::String) = df[!, sym] .== value
 Base.getindex(df::DataFrame, sym::Symbol, values::Vector{String}) = [v in values for v in df[!, sym]]
 Base.getindex(df::DataFrame, v::BitVector) = df[v, :]
 
+split_by(d::Lincs, sym::Symbol) = [String(v) => d[sym, v] for v in unique(d[sym])] |> Dict
+expr(d::Lincs, i::Vector{Int64}) = d.expr[:,i]
 
 function create_filter(lm_data::Lincs, criteria::Dict{Symbol, Vector{Symbol}})
     # Returns a bit vector: 1 for experiments that satisfy all the criteria, else 0.
@@ -25,6 +28,8 @@ function create_filter(lm_data::Lincs, criteria::Dict{Symbol, Vector{Symbol}})
     end
     return reduce(.&, filters)
 end
+
+
 
 
 function get_untreated_profiles(lm_data::Lincs)
