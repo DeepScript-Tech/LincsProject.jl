@@ -28,6 +28,9 @@ function Lincs(prefix::String, gctx::String, out_fn::String)
 
     compound_df = combine(gdf, :cmap_name => (x -> first(x)) => :first_name)
     compound_df[!,:pert_id] = Symbol.(compound_df.pert_id)
+    @Threads.threads for col in names(compound_df)
+        compound_df[!, col] = Symbol.(compound_df[!, col])
+    end
 
     ## Gene and sample annotations
 
@@ -63,7 +66,7 @@ function Lincs(prefix::String, gctx::String, out_fn::String)
     # lm_df = get(g, (feature_space=:landmark,), nothing)
     lm_row = [findfirst(id -> id == sym, exprGene_id) for sym in lm_id]
 
-    chunk_size = 32*1000
+    chunk_size = 8*1000
     ngene, ninst = size(expr)
     nlm = length(lm_row)
 
